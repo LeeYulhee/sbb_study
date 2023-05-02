@@ -40,8 +40,7 @@ public class QuestionController {
            value = "kw", defaultValue = "" : URL 페이지에 파라미터 kw가 전될되지 않은 경우 디폴트 값이 ""로 설정 -> 모든 값을 검색한다는 뜻 == 모든 목록 출력 */
         /* 실행 흐름 : Controller에 매핑된 URL로 요청이 들어오면, questionService의 getList 메서드 실행 -> questionService의 getList는 int page를 받아 PageRequest.of(page, 개수)를 Pageable 객체에 넣음
                        -> questionService는 questionRepository에서 pageable(page, 개수/페이징 처리)이 적용된 findAll을 return -> Page<Question> 객체에 questionService.getList한 값이 들어감
-                       -> model.addAttribute로 paging 객체를 "paging" 속성으로 전달 -> Controller는 해당 값을 전달 받고 처리된 question_list.html(View) return
-         */
+                       -> model.addAttribute로 paging 객체를 "paging" 속성으로 전달 -> Controller는 해당 값을 전달 받고 처리된 question_list.html(View) return */
         Page<Question> paging = this.questionService.getList(page, kw);
         // Question 클래스를 Page 클래스(페이징 처리를 위한 클래스)로 받은 데이터를 참조한 paging 변수에 questionService에서 현재 page와 kw 값으로 questionRepository에서 조회한 값과 10개 단위로 페이징 처리한 값을 대입
         model.addAttribute("paging", paging);
@@ -69,65 +68,118 @@ public class QuestionController {
     }
 
     @PreAuthorize(("isAuthenticated()"))
+    // 로그인한 상태인지 먼저 확인
     @GetMapping("/create")
+    // "question/create"와 URL 연결
     public String questionCreate(QuestionForm questionForm) {
+        // 질문 작성하는 페이지를 보여주는 메서드로 QuestionForm을 매개변수로 받음(다만 작성된 내용이 없으므로 Null 상태일 것)
         return "question_form";
+        // 질문을 작성하는 question_form.html(View)을 return
     }
 
     @PreAuthorize("isAuthenticated()")
+    // 로그인한 상태인지 먼저 확인
     @PostMapping("/create")
+    // "question/create"와 URL 연결(POST 요청) -> POST 요청은 서버의 리소스를 새로 생성하거나 업데이트할 때 사용(DB로 따지면 Create에 가깝고, 멱등X(리소스를 생성/업데이트에 사용해서 POST 요청 발생 시 서버가 변경될 수 있음))
     public String questionCreate(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal) {
+        // 질문을 작성하는 메서드로 QuestionForm(@Valid 애너테이션으로 Form  클래스에 애너테이션으로 설정한 검증 기능 작동), QuestionForm의 검증된 결과를 받는 BindingResult, 현재 사용자 정보(principal)를 매개 변수로 받음
         if (bindingResult.hasErrors()) {
+        // 만약 bindingResult에 에러가 있으면
             return "question_form";
+            // 다시 질문을 작성하는 question_form.html(View)를 return
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
+        // SiteUser 클래스를 참조하는 siteUser 변수에 userService에서 현재 사용자 정보(principal)의 이름을 얻어와서 UserRepository에 findByusername으로 조회된 값을 대입
         this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser);
+        // questionService의 create메서드에서 Question 객체를 생성하고 questionForm으로 전달된 내용 중 Subject와 Content, 위에서 받아온 siteUser를 매개변수로 전달해 해당 내용을 객체에 저장한 뒤, QuestionRepository에 save로 저장
         return "redirect:/question/list";
+        // 질문 목록을 보여주는 페이지인 "question/list"로 연결
     }
 
     @PreAuthorize("isAuthenticated()")
+    // 로그인한 상태인지 먼저 확인
     @GetMapping("/modify/{id}")
+    // "question/modify/(question.id)"와 URL 연결(GET 요청)
     public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
+        // question을 수정하는 화면을 불러오는 메서드로, QuestionForm(현재 비어 있는 상태(Null)로, 기존 답변을 저장 -> View에 전달할 예정이기 때문에 선언), URL에서 받은 quetion의 id, 현재 사용자 정보(principal)를 매개변수로 받음
         Question question = this.questionService.getQuestion(id);
+        // Question 클래스를 참조하는 question 변수에 questionService에서 현재 question의 id로 QuestionRepository에서 findById로 조회된 값을 대입
         if(!question.getAuthor().getUsername().equals(principal.getName())) {
+        // 만약 question의 getAuthor로 받아온 SiteUser를 참조한 author의 이름(getUsername)과 현재 사용자 정보(principal)의 이름이 같지 않다면
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
+            /* "수정 권한이 없습니다"라는 메세지와 함께 오류 반환
+               ResponseStatusException(HttpStatus.BAD_REQUEST) : 400 Bad Request HTTP 응답코드로 반환 */
         }
         questionForm.setSubject(question.getSubject());
+        // 비어 있는 questionForm에 기존(현재) question의 subject를 setSubject로 저장
         questionForm.setContent(question.getContent());
+        // 비어 있는 questionForm에 기존(현재) question의 content를 setContentfh 저장
         return "question_form";
+        // 질문을 수정(작성)하는 question_form.html(View)에 기존 질문 제목과 내용을 함께 return
     }
 
     @PreAuthorize("isAuthenticated()")
+    // 로그인한 상태인지 먼저 확인
     @PostMapping("/modify/{id}")
+    // "question/modify/(question.id)"와 URL 연결(POST 요청)
     public String questionModify(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal, @PathVariable("id") Integer id) {
+        /* question을 수정하는 메서드로, QuestionForm(@Valid 애너테이션으로 Form  클래스에 애너테이션으로 설정한 검증 기능 작동), QuestionForm의 검증된 결과를 받는 BindingResult, 현재 사용자 정보(principal), question의 id를 매개 변수로 받음
+           수정 과정의 전반적인 흐름 : 질문을 수정하고 저장하기 버튼을 누르면 질문이 수정되는 것이 아니라, 새로운 질문으로 등록되는데 이 문제는 템플릿(View) 폼 태그의 action을 잘 활용해 유연하게 대처
+                                       question_form.html의 th:action을 삭제한 후  <form th:object="${questionForm}" method="post"> <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> 로 수정
+                                       -> 폼 태그의 action 속성 없이 폼을 submit 하면, 폼의 action은 현재 URL 기준으로 전송. 즉, 질문 등록할 때는 /question/create이기 때문에 action 속성에 create가 설정되고, question/modify/{id}일 때는 action 속성에 modify로 설정
+                                       th:action을 삭제하면 CSRF 값이 자동으로 생성되지 않기 때문에 hidden 형태의 input 엘리먼트를 수동으로 추가(input 태그는 사용자가 입력한 데이터를 폼과 함께 서버로 보내기 위한 데이터를 생성) */
         if(bindingResult.hasErrors()) {
+        // 만약 bindingResult에 에러가 있으면
             return "question_form";
+            // 다시 질문을 수정(작성)하는 question_form.html(View)를 return
         }
         Question question = this.questionService.getQuestion(id);
+        // Question 클래스를 참조하는 question 변수에 questionService에서 현재 question의 id로 QuestionRepository에서 findById로 조회된 값을 대입
         if(!question.getAuthor().getUsername().equals(principal.getName())) {
+        // 만약 question의 getAuthor로 받아온 SiteUser를 참조한 author의 이름(getUsername)과 현재 사용자 정보(principal)의 이름이 같지 않다면
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
+            // "수정 권한이 없습니다"라는 메세지와 함께 오류 반환
         }
         this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
+        /* questionService의 modify메서드에 question과 새로 들어온 questionForm의 제목과 내용을 매개변수로 넣고 실행
+           questionService.modify : qutestion 객체의 subject(제목)과 content(내용)에 매개변수로 들어온 제목과 내용을 넣고, 현재 날짜를 modifyDate에 넣은 뒤, 해당 객체를 questionRepository에 save로 저장 */
         return String.format("redirect:/question/detail/%s", id);
+        // redirect로 해당 URL로 이동 -> question/detail/(question.id)로 id로 조회된 해당(수정한 현재) 질문의 상세 페이지
     }
 
     @PreAuthorize("isAuthenticated()")
+    // 로그인한 상태인지 먼저 확인
     @GetMapping("/delete/{id}")
+    // "question/delete/(question.id)"와 URL 연결
     public String questionDelete(Principal principal, @PathVariable("id") Integer id) {
+        // question을 삭제하는 메서드로 현재 사용자 정보(principal)와 URL에서 전달 받은 현재 질문의 id를 매개변수로 받음
         Question question = this.questionService.getQuestion(id);
+        // Question 클래스를 참조하는 question 변수에 questionService에서 현재 question의 id로 QuestionRepository에서 findById로 조회된 값을 대입
         if(!question.getAuthor().getUsername().equals(principal.getName())) {
+        // 만약 question의 getAuthor로 받아온 SiteUser를 참조한 author의 이름(getUsername)과 현재 사용자 정보(principal)의 이름이 같지 않다면
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다.");
+            // "삭제 권한이 없습니다"라는 메세지와 함께 오류 반환
         }
         this.questionService.delete(question);
+        // questionService의 delete 메서드를 통해 questionRepository에서 해당 question을 삭제
         return "redirect:/";
+        //  redirect로 메인 페이지(/)로 연결되는데, 메인 페이지는 list 페이지로 redirect 시키기 때문에 "question/list"로 이동
     }
 
     @PreAuthorize("isAuthenticated()")
+    // 로그인한 상태인지 먼저 확인
     @GetMapping("/vote/{id}")
+    // "question/vote/(question.id)"와 URL 연결
     public String questionVote(Principal principal, @PathVariable("id") Integer id) {
+        // question을 추천하는 메서드로 현재 사용자 정보(principal)와 question의 id가 매개변수로(@PathVariable을 통해) 들어옴
         Question question = this.questionService.getQuestion(id);
+        // Question 클래스를 참조하는 question 변수에 questionService에서 현재 question의 id로 QuestionRepository에서 findById로 조회된 값을 대입
         SiteUser siteUser = this.userService.getUser(principal.getName());
+        // SiteUser 클래스의 siteUser 변수에 userService에서 현재 사용자 정보(principal)의 이름으로 userRepository에서 조회한 값을 대입
         this.questionService.vote(question, siteUser);
+        /* questionService의 vote 메서드에 question과 siteUser를 매개변수로 넣음 -> vote 메서드에서 question의 voter Set(중복X)을 불러와서 현재 siteUser를 add하고 questionRepository에 정보가 바뀐 question을 save
+           추천 숫자가 올라가는 곳은 question_detail.html에 th:text="${#lists.size(question.voter)}"로 구현되어 있음 */
         return String.format("redirect:/question/detail/%s", id);
+        // redirect로 해당 URL로 이동 -> question/detail/(question.id)로 id로 조회된 해당(현재) 질문의 상세 페이지
     }
 }

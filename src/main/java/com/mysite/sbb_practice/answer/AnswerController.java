@@ -90,7 +90,7 @@ public class AnswerController {
                ResponseStatusException(HttpStatus.BAD_REQUEST) : 400 Bad Request HTTP 응답코드로 반환 */
         }
         answerForm.setContent(answer.getContent());
-        // 비어있는 answerForm에 기존(현재) answer의 내용을 setContent로 저장
+        // 비어 있는 answerForm에 기존(현재) answer의 내용을 setContent로 저장
         return "answer_form";
         // answer_form.html(answer 수정 화면) return
     }
