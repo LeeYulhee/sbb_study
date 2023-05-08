@@ -74,44 +74,74 @@ public class QuestionService {
     }
 
     public Question getQuestion(Integer id) {
+    // Question을 id로 검색한 결과를 얻는 메서드로, id를 매개변수로 받음
         Optional<Question> question = this.questionRepository.findById(id);
+        // Question 클래스를 참조한 question 변수에 questionRepository에서 id로 찾은 question을 대입하는데, Optional을 통해 해당 question이 없는 경우를 대비
         if (question.isPresent()) {
+        // 만약 question의 값이 있다면(true)
             return  question.get();
+            // question을 가져와 return
         } else {
+        // 그게 아니라면(question의 값이 없다면)
             throw new DataNotFoundException("question not found");
+            // "question not found" 메세지와 함께 DataNotFoundException 오류를 발생시킴
         }
     }
 
     public void create(String subject, String content, SiteUser user) {
+    // Question을 생성하는 메서드로, subject(제목), content(내용), user(글 쓴 사람/사용자)을 매개변수로 받음
         Question q = new Question();
+        // Question 클래스의 q 변수에 새로운 Question 객체 생성해서 대입
         q.setSubject(subject);
+        // q에 subject로 들어온 String을 setSubject 메서드를 이용해 subject로 저장
         q.setContent(content);
+        // q에 content로 들어온 String을 setContent 메서드를 이용해 content로 저장
         q.setCreateDate(LocalDateTime.now());
+        // q에 현재 시간(LocalDateTime.now())을 setCreateDate 메서드를 이용해 createDate로 저장
         q.setAuthor(user);
+        // q에 들어온 user(SiteUser 클래스를 참조)를 setAuthor 메서드를 통해 author로 저장
         this.questionRepository.save(q);
+        // 위의 과정을 통해 필요한 정보들을 객체에 넣어주고 questionRepository에 save를 통해 q 데이터를 저장
     }
 
     public Page<Question> getList(int page, String kw) {
+    // Page 클래스를 이용해 Question을 페이징 처리해서 받아오는 메서드로 page와 kw(검색어)를 매개변수로 받음
         List<Sort.Order> sorts = new ArrayList<>();
+        // Sort.Order를 참조한 List인 sorts 변수에 ArrayList 객체를 생성에서 대입
         sorts.add(Sort.Order.desc("createDate"));
+        // sorts.add로 정렬 조건을 추가 -> createDate(작성일자)의 역순(desc)으로 정렬하는 조건 추가
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+        /* Pageable 클래스를 참조한 pageable 변수에 PageRequest.of 메서드를 사용하여 page(페이지 번호), 10(한 번에 띄우는 question 개수), Sort.by(sorts)(작성일자의 내림차순으로 정렬한 list)의 결과를 생성해서 대입
+           Pageable : 해당 인터페이스는 페이지네이션에 필요한 정보를 담음 */
         Specification<Question> spec = search(kw);
+        // Question을 참조한 Specification(Specificaion은 동적 쿼리를 만드는 데 사용됨)의 변수 spec에 kw(검색어)로 들어온 값을 search 메서드(검색어를 입력 받아 쿼리의 JOIN문과 WHERE문을 생성)에 매개변수로 전달한 값을 대입
         return this.questionRepository.findAllByKeyword(kw, pageable);
+        // questionRepository의 findAllByKeyword 메서드를 이용해 kw로 전달된 값으로 검색한 결과를 pageable을 이용해 조건에 맞게 페이징 처리해서 return
     }
 
     public void modify(Question question, String subject, String content) {
+    // question을 수정하는 메서드로 question(Controller에서 전달해줄 때 getQuestion으로 넣은 뒤에 전달하기 때문에 값이 있음)과 subject, content를 매개변수로 받음
         question.setSubject(subject);
+        // question에 setSubject를 통해 새로 들어온 subject를 저장
         question.setContent(content);
+        // question에 setContent를 통해 새로 들어온 content를 저장
         question.setModifyDate(LocalDateTime.now());
+        // question에 setModifyDate를 통해 현재 시각을 수정 날짜로 저장
         this.questionRepository.save(question);
+        // 위에서 넣은 내용을 quetionRepository에 save를 통해서 question을 저장
     }
 
     public void delete(Question question) {
+    // question을 지우는 메서드로 question(Controller에서 전달해줄 때 getQuestion으로 넣은 뒤에 전달하기 때문에 값이 있음)을 매개변수로 받음
         this.questionRepository.delete(question);
+        // questionRepository에서 question을 delete 메서드로 삭제
     }
 
     public void vote(Question question, SiteUser siteUser) {
+    // 추천을 하면 추천한 사람이 question의 voter로 저장되는 메서드로 question과 siteUser를 매개변수로 받음
         question.getVoter().add(siteUser);
+        // question의 getVoter()로 voter list를 불러오고 거기에 siteUser를 추가
         this.questionRepository.save(question);
+        // question의 내용이 바뀌었으니 questionRepository에 question을 저장
     }
 }

@@ -26,7 +26,7 @@ public class AnswerService {
     private final AnswerRepository answerRepository;
 
     public Answer create(Question question, String content, SiteUser author) {
-        // Answer를 생성하는 메서드로 Question, 내용, SiteUser를 매개변수로 받음
+    // Answer를 생성하는 메서드로 Question, 내용, SiteUser를 매개변수로 받음
         Answer answer = new Answer();
         // Answer 클래스의 answer 변수에 새로운 Answer 객체 생성해서 대입
         answer.setContent(content);
@@ -43,7 +43,7 @@ public class AnswerService {
     }
 
     public Answer getAnswer(Integer id) {
-        // Answer를 받아오는 메서드로 answer의 id를 매개변수로 받음
+    // Answer를 받아오는 메서드로 answer의 id를 매개변수로 받음
         Optional<Answer> answer = this.answerRepository.findById(id);
         // Answer 클래스를 참조한 answer 변수에 answerRepository에서 id로 찾은 answer를 대입하는데, Optional을 통해 해당 answer가 없는 경우를 대비
         if(answer.isPresent()) {
