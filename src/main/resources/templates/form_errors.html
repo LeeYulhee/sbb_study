@@ -1,4 +1,8 @@
 <div th:fragment="formErrorsFragment" class="alert alert-danger"
      role="alert" th:if="${#fields.hasAnyErrors()}">
+    <!-- formErrorsFragment라는 이름의 코드 조각을 정의하고, 부트스트랩의 alert 스타일을 적용한 div를 시작 -->
     <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />
+    <!-- fields 객체에서 발생한 모든 오류를 반복하고, 각 오류에 대한 div를 생성
+    th:each : 반복문(자바 for each 문과 유사)으로 반복 횟수만큼 해당 엘리먼트를 반복하여 표시 -->
 </div>
+<!-- formErrorsFragment의 끝 -->

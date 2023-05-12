@@ -1,16 +1,34 @@
 <html layout:decorate="~{layout}">
+<!-- HTML 문서의 시작을 선언하고, 레이아웃을 참조하는 데코레이터를 사용
+layout:decorate : 해당 속성을 이용해 템플릿의 레이아웃(부모 템플릿)으로 사용할 템플릿 설정
+템플릿 상속 : 템플릿 파일들을 표준 HTML 구조에 맞추면 body 엘리먼트 바깥 부분은 중복되니 기본 틀이 되는 템플릿을 만들고 다른 템플릿들이 그 템플릿을 상속해 사용 -->
 <div layout:fragment="content" class="container">
+<!-- 본문 영역을 정의(layout 참조)하고, 부트스트랩 클래스를 사용하여 스타일을 적용
+부모 템플릿의 th:block 엘리먼트의 내용이 자식 템플릿의 div 엘리먼트 내용으로 교체 -->
     <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <!-- 제목을 표시하고, 하단 경계선과 여백을 적용 -->
     <form th:object="${questionForm}" method="post">
+    <!-- 폼을 정의하고, questionForm 객체를 사용하여 POST 메서드로 전송
+    원래는 th:action 속성이었으나 수정 기능 추가하면서 삭제하고 th:object로 변경
+        -> th:object 속성은 폼과 연결된 객체 지정 & th:object를 사용하면 데이터가 객체로 받아짐
+           폼 태그의 action 속성 없이 폼을 submit 하면, 폼의 action은 현재 URL 기준으로 전송
+           즉, 질문 등록할 때는 /question/create이기 때문에 폼 전송 시 action 속성에 /question/create가 설정
+           답변 수정 시에는 브라우저에 표시된 URL이 /question/modify/{id} 형태의 URL이기 때문에 POST로 폼 전송 시 action 속성에 /question/modify/{id} 형태의 URL이 설정
+           th:action 속성을 삭제하면 CSRF 값이 자동으로 생성되지 않기 때문에 CSRF 값을 설정하기 위한 hidden 형태의 input 엘리먼트를 수동으로 추가(밑에 input 태그로 추가) -->
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <!-- 오류 메시지를 출력하는 데 사용되는 코드 조각을 포함
+        th:replace : 공통 템플릿(공통 템플릿을 템플릿 내에 삽입할 수 있음 == 다른 템플릿 또는 코드 조각(fragment)을 현재 위치에 대체하여 삽입할 수 있음)
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div> : div 엘리먼트를 form_errors.html 파일의 th:fragment 속성명이 formErrorsFragment인 엘리먼트로 교체하라는 의미 -->
         <div class="mb-3">
             <label for="subject" class="form-label">제목</label>
             <input type="text" th:field="*{subject}" class="form-control">
+            <!-- th:field : 필드를 객체의 내부(th:object에 설정한)와 매칭 -->
         </div>
         <div class="mb-3">
             <label for="content" class="form-label">내용</label>
             <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
+            <!-- th:field : 필드를 객체의 내부(th:object에 설정한)와 매칭 -->
         </div>
         <input type="submit" value="저장하기" class="btn btn-primary my-2">
     </form>

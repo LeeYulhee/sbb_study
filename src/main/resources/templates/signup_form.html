@@ -1,28 +1,44 @@
 <html layout:decorate="~{layout}">
+<!-- HTML 문서의 시작을 선언하고, 레이아웃을 참조하는 데코레이터를 사용
+layout:decorate : 해당 속성을 이용해 템플릿의 레이아웃(부모 템플릿)으로 사용할 템플릿 설정
+템플릿 상속 : 템플릿 파일들을 표준 HTML 구조에 맞추면 body 엘리먼트 바깥 부분은 중복되니 기본 틀이 되는 템플릿을 만들고 다른 템플릿들이 그 템플릿을 상속해 사용 -->
 <div layout:fragment="content" class="container my-3">
+<!-- 본문 영역을 정의(layout 참조)하고, 부트스트랩 클래스를 사용하여 스타일을 적용
+부모 템플릿의 th:block 엘리먼트의 내용이 자식 템플릿의 div 엘리먼트 내용으로 교체 -->
     <div class="my-3 border-bottom">
         <div>
-            <h4>회원가입</h4>
+            <h4>회원가입</h4> <!-- 회원가입 제목을 표시합니다. -->
         </div>
     </div>
     <form th:action="@{/user/signup}" th:object="${userCreateForm}" method="post">
+    <!-- 회원가입 양식을 시작하고, 해당 폼의 액션은 "/user/signup"으로 설정. th:object로 "userCreateForm" 객체를 사용 -->
+
         <div th:replace="~{form_errors :: formErrorsFragment}"></div>
-        <div class="mb-3">
+        <!-- 오류 메시지를 출력하는 데 사용되는 코드 조각을 포함
+        th:replace : 공통 템플릿(공통 템플릿을 템플릿 내에 삽입할 수 있음 == 다른 템플릿 또는 코드 조각(fragment)을 현재 위치에 대체하여 삽입할 수 있음)
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div> : div 엘리먼트를 form_errors.html 파일의 th:fragment 속성명이 formErrorsFragment인 엘리먼트로 교체하라는 의미 -->
+
+        <div class="mb-3"> <!-- 사용자 ID 입력 부분을 위한 div 태그 -->
             <label for="username" class="form-label">사용자ID</label>
             <input type="text" th:field="*{username}" class="form-control">
+            <!-- th:field : 필드를 객체의 내부(th:object에 설정한)와 매칭 -->
         </div>
-        <div class="mb-3">
+        <div class="mb-3"> <!-- 비밀번호 입력 부분을 위한 div 태그 -->
             <label for="password1" class="form-label">비밀번호</label>
             <input type="password" th:field="*{password1}" class="form-control">
+            <!-- th:field : 필드를 객체의 내부(th:object에 설정한)와 매칭 -->
         </div>
-        <div class="mb-3">
+        <div class="mb-3"> <!-- 비밀번호 확인 입력 부분을 위한 div 태그 -->
             <label for="password2" class="form-label">비밀번호 확인</label>
             <input type="password" th:field="*{password2}" class="form-control">
+            <!-- th:field : 필드를 객체의 내부(th:object에 설정한)와 매칭 -->
         </div>
-        <div class="mb-3">
+        <div class="mb-3"> <!-- 이메일 입력 부분을 위한 div 태그 -->
             <label for="email" class="form-label">이메일</label>
             <input type="email" th:field="*{email}" class="form-control">
+            <!-- th:field : 필드를 객체의 내부(th:object에 설정한)와 매칭 -->
         </div>
+
         <button type="submit" class="btn btn-primary">회원가입</button>
     </form>
 </div>

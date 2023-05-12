@@ -1,20 +1,32 @@
 <nav th:fragment="navbarFragment" class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+<!-- navbarFragment라는 이름의 코드 조각을 정의하고, 부트스트랩 네비게이션바를 시작 -->
     <div class="container-fluid">
+    <!-- 컨테이너 요소를 시작하고, 반응형 레이아웃을 위한 클래스를 적용 -->
         <a class="navbar-brand" href="/">SBB</a>
+        <!-- 네비게이션바의 브랜드 로고를 설정하고, 홈페이지 링크를 추가 -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
+        <!-- 토글 버튼을 추가하고, 반응형 네비게이션바의 동작을 설정 -->
         </button>
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <!-- 네비게이션 링크를 포함하는 div를 시작하고, 토글 버튼과 연결 -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!-- 네비게이션 링크 목록을 시작합 -->
                 <li class="nav-item">
+                    <!-- 첫 번째 네비게이션 항목을 정의하고, 로그인 및 로그아웃 링크를 추가 -->
                     <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/user/login}">로그인</a>
+                    <!-- sec:authorize="isAnonymous()" : 로그인 되지 않은 경우에만 해당 엘리먼트가 표시 -->
                     <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/user/logout}">로그아웃</a>
+                    <!-- sec:authorize="isAuthenticated()" : 로그인 된 경우에만 해당 엘리먼트가 표시 -->
                 </li>
                 <li class="nav-item">
+                <!-- 두 번째 네비게이션 항목을 정의하고, 회원가입 링크를 추가 -->
                     <a class="nav-link" th:href="@{/user/signup}">회원가입</a>
+                    <!-- th:href : 링크 속성으로 th:href="@{주소}"가 기본 형태 -->
                 </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+            </ul> <!-- 네비게이션 링크 목록의 끝 -->
+        </div> <!-- 네비게이션 링크를 포함하는 div의 끝 -->
+    </div> <!-- 컨테이너 요소의 끝 -->
+</nav> <!-- navbarFragment의 끝 -->

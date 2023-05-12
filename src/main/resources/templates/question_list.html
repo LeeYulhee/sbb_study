@@ -1,19 +1,34 @@
 <html layout:decorate="~{layout}">
+<!-- HTML 문서의 시작을 선언하고, 레이아웃을 참조하는 데코레이터를 사용
+layout:decorate : 해당 속성을 이용해 템플릿의 레이아웃(부모 템플릿)으로 사용할 템플릿 설정
+템플릿 상속 : 템플릿 파일들을 표준 HTML 구조에 맞추면 body 엘리먼트 바깥 부분은 중복되니 기본 틀이 되는 템플릿을 만들고 다른 템플릿들이 그 템플릿을 상속해 사용 -->
 <div layout:fragment="content" class="container my-3">
+<!-- 본문 영역을 정의(layout 참조)하고, 부트스트랩 클래스를 사용하여 스타일을 적용
+부모 템플릿의 th:block 엘리먼트의 내용이 자식 템플릿의 div 엘리먼트 내용으로 교체 -->
     <div class="row my-3">
-        <div class="col-6">
+    <!-- "질문 등록하기" 버튼과 검색 입력창을 가로로 배치하기 위해 부트스트랩의 row 클래스를 사용하는 div 태그 -->
+        <div class="col-6"> <!-- 왼쪽 열에 질문 등록하기 버튼을 배치하기 위한 div 태그 -->
             <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+            <!-- "질문 등록하기" 버튼을 생성하고, 클릭 시 "/question/create"로 이동 -->
+
         </div>
         <div class="col-6">
+        <!-- 오른쪽 열에 검색 입력창을 배치하기 위한 div 태그 -->
             <div class="input-group">
+            <!-- 검색 입력창과 검색 버튼을 그룹화하기 위한 div 태그 -->
                 <input type="text" id="search_kw" class="form-control" th:value="${kw}">
+                <!-- 검색어를 입력할 수 있는 텍스트 입력창입니다. "${kw}" 값을 사용하여 입력창에 기본값을 설정 -->
                 <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button>
+                <!-- "찾기" 버튼을 생성 -->
             </div>
         </div>
     </div>
     <table class="table">
+    <!-- 질문 목록을 표시하기 위한 테이블 -->
         <thead class="table-dark">
+        <!-- 테이블의 헤더를 생성하고, 부트스트랩 클래스를 사용하여 스타일을 적용 -->
         <tr class="text-center">
+            <!-- 테이블 헤더의 각 열을 가운데 정렬하기 위한 tr 태그 -->
             <th>번호</th>
             <th style="width:50%">제목</th>
             <th>글쓴이</th>
@@ -21,24 +36,41 @@
         </tr>
         </thead>
         <tbody>
+        <!-- 테이블의 본문을 시작 -->
         <tr class="text-center" th:each="question, loop : ${paging}">
+        <!-- 테이블의 각 행을 생성하고, "question"과 "loop" 변수를 사용하여 각 질문을 반복 -->
             <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
+            <!-- 번호 열에 표시할 번호를 계산하여 표시 -->
             <td class="text-start">
+            <!-- 제목 열의 시작 부분을 왼쪽 정렬하기 위한 td 태그 -->
                 <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                <!-- 제목을 클릭 시 해당 질문의 세부 페이지로 이동하는 링크를 생성하고, 질문 제목을 표시 -->
                 <span class="text-danger small ms-2" th:if="${#lists.size(question.answerList) > 0}"
                       th:text="${#lists.size(question.answerList)}">
+                <!-- 답변이 있는 경우, 답변의 수를 표시
+                #lists.size : 이터러블 객체(배열을 일반화한 객체)의 길이(사이즈)를 반환
+                th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함 -->
                 </span>
             </td>
             <td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+            <!-- 작성자 열에 작성자의 이름을 표시 -->
             <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <!-- 작성일시 열에 작성일시를 'yyyy-MM-dd HH:mm' 형식으로 표시 -->
         </tr>
         </tbody>
     </table>
     <!-- 페이징처리 시작 -->
     <div th:if="${!paging.isEmpty()}">
+    <!-- 페이지가 비어있지 않은 경우 페이징 처리를 시작 -->
         <ul class="pagination justify-content-center">
+        <!-- 페이지 번호들을 가운데 정렬하기 위한 ul 태그 -->
             <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
+            <!-- 이전 페이지가 없는 경우 "disabled" 클래스를 추가 -> 이전 페이지가 없으면 비활성화
+            th:classappend="조건식 ? 클래스값" : 조건식이 참인 경우 클래스 값을 class 속성에 추가 -->
                 <a class="page-link" href="javascript:void(0)" th:data-page="${paging.number-1}">
+                <!-- 각 페이지 번호를 표시하고, 해당 페이지로 이동하는 링크를 생성
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용 -->
                     <span>이전</span>
                 </a>
             </li>
@@ -46,10 +78,24 @@
                 th:if="${page >= paging.number-5 and page <= paging.number+5}"
                 th:classappend="${page == paging.number} ? 'active'"
                 class="page-item">
+            <!-- 페이지 번호들을 생성하고, 현재 페이지에 "active" 클래스를 추가 -> active 클래스는 부트스트랩에서 제공하는 클래스로, 페이지네이션 컴포넌트에 사용되는 현재 페이지를 강조하기 위해 사용
+            th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성
+                    li 엘리먼트 안에 위치해 있기 때문에 li 엘리먼트의 출력 여부를 결정 -> 현재 페이지를 중심으로 좌우 5개씩의 페이지 번호만 출력
+            th:each : 반복횟수만큼 해당 엘리먼트를 반복하여 표시(자바 for each 문과 유사)
+            #numbers.sequence(시작, 끝) : 시작 번호부터 끝 번호까지의 루프를 만듦
+            th:classappend="조건식 ? 클래스값" : 조건식이 참인 경우 클래스 값을 class 속성에 추가 -->
                 <a th:text="${page}" class="page-link" href="javascript:void(0)" th:data-page="${page}"></a>
+                <!-- 각 페이지 번호를 표시하고, 해당 페이지로 이동하는 링크를 생성
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용 -->
             </li>
             <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
+            <!-- 다음 페이지가 없는 경우 "disabled" 클래스를 추가 -> 다음 페이지가 없으면 비활성화
+            th:classappend="조건식 ? 클래스값" : 조건식이 참인 경우 클래스 값을 class 속성에 추가 -->
                 <a class="page-link" href="javascript:void(0)" th:data-page="${paging.number+1}">
+                <!-- 다음 페이지로 이동하는 링크를 생성
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용 -->
                     <span>다음</span>
                 </a>
             </li>
@@ -57,23 +103,44 @@
     </div>
     <!-- 페이징처리 끝 -->
     <form th:action="@{/question/list}" method="get" id="searchForm">
+    <!-- 검색을 위한 폼을 생성하고, 액션을 "/question/list"로 설정 -->
         <input type="hidden" id="kw" name="kw" th:value="${kw}">
+        <!-- 검색어를 저장하는 숨겨진 입력창. "${kw}" 값을 사용하여 입력창에 기본값을 설정 -->
         <input type="hidden" id="page" name="page" th:value="${paging.number}">
+        <!-- 페이지 번호를 저장하는 숨겨진 입력창. "${paging.number}" 값을 사용하여 입력창에 기본값을 설정 -->
     </form>
 </div>
 <script layout:fragment="script" type='text/javascript'>
+/* <script> : JavaScript 코드를 포함하는 태그
+layout:fragment="script" : Thymeleaf 레이아웃 다이얼렉트(dialect)를 사용하여, 이 <script> 태그를 "script"라는 이름의 레이아웃 조각(fragment)으로 정의
+                           이렇게 정의된 레이아웃 조각은 다른 Thymeleaf 템플릿에서 재사용할 수 있음
+                           다른 템플릿에서 이 레이아웃 조각을 가져와 삽입하려면, layout:fragment 속성을 사용하는 방법이 있음 */
     const page_elements = document.getElementsByClassName("page-link");
+    // "page-link" 클래스를 가진 모든 요소를 가져옴
     Array.from(page_elements).forEach(function(element) {
+    // 각 요소에 대해 다음 작업을 수행
         element.addEventListener('click', function() {
+        // 클릭 이벤트 리스너를 추가
             document.getElementById('page').value = this.dataset.page;
+            /* 클릭한 요소의 data-page 속성 값을 'page' 숨겨진 입력창에 설정
+            숨겨직 입력창이란, input type="hidden" 속성을 말하는 것으로, 페이지에서 보이지 않지만 서버에 전송되는 폼 데이터에는 포함
+            사용자가 직접 조작하지 못하게 하는 동시에, 필요한 데이터를 서버에 전송할 수 있음 */
             document.getElementById('searchForm').submit();
+            // 'searchForm' 폼을 제출
         });
     });
     const btn_search = document.getElementById("btn_search");
+    // "btn_search" ID를 가진 요소를 가져옴
     btn_search.addEventListener('click', function() {
+    // 클릭 이벤트 리스너를 추가
         document.getElementById('kw').value = document.getElementById('search_kw').value;
-        document.getElementById('page').value = 0;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
+        /* 'search_kw' 입력창의 값을 'kw' 숨겨진 입력창에 설정
+        숨겨직 입력창이란, input type="hidden" 속성을 말하는 것으로, 페이지에서 보이지 않지만 서버에 전송되는 폼 데이터에는 포함
+        사용자가 직접 조작하지 못하게 하는 동시에, 필요한 데이터를 서버에 전송할 수 있음 */
+        document.getElementById('page').value = 0;
+        // 검색버튼을 클릭할 경우 0페이지부터 조회
         document.getElementById('searchForm').submit();
+        // 'searchForm' 폼을 제출
     });
 </script>
 </html>

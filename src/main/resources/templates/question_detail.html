@@ -1,101 +1,197 @@
 <html layout:decorate="~{layout}">
+<!-- HTML 문서의 시작을 선언하고, 레이아웃을 참조하는 데코레이터를 사용
+layout:decorate : 해당 속성을 이용해 템플릿의 레이아웃(부모 템플릿)으로 사용할 템플릿 설정
+템플릿 상속 : 템플릿 파일들을 표준 HTML 구조에 맞추면 body 엘리먼트 바깥 부분은 중복되니 기본 틀이 되는 템플릿을 만들고 다른 템플릿들이 그 템플릿을 상속해 사용 -->
 <div layout:fragment="content" class="container my-3">
+<!-- 본문 영역을 정의(layout 참조)하고, 부트스트랩 클래스를 사용하여 스타일을 적용
+부모 템플릿의 th:block 엘리먼트의 내용이 자식 템플릿의 div 엘리먼트 내용으로 교체 -->
+
     <!-- 질문 -->
     <h2 class="border-bottom py-2" th:text="${question.subject}"></h2>
-    <div class="card my-3">
+    <!-- 질문 제목을 출력
+    th:text : 텍스트 속성으로 엘리먼트의 텍스트로 값을 출력
+              기본 형태는 th:text=값
+              th:text 속성 대신 대괄호를 사용하여 값을 직접 출력할 수 있음 -> [[${question.subject}]] -->
+    <div class="card my-3"> <!-- 질문 내용을 출력하는 카드를 시작 -->
         <div class="card-body">
+
             <div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
             <div class="card-text" style="white-space: pre-line;" th:text="${question.content}"></div>
+            <!-- 질문 내용을 마크다운 형식으로 출력하고, 줄바꿈을 적용
+            th:utext : th:text를 사용하면 HTML의 태그들이 이스케이프(escape) 처리 되어 태그들이 그대로 화면에 보임
+                       변수에서 받은 값에 HTML 태그가 있다면 태그 값을 반영해서 표시
+            th:text : 태그 안의 텍스트를 서버에서 전달 받은 값에 따라 표현하고자 할 때 사용 -->
+
             <div class="d-flex justify-content-end">
+            <!-- 질문의 수정 날짜와 작성자 정보를 출력 -->
                 <div th:if="${question.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                <!-- th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함 -->
                     <div class="mb-2">modified at</div>
                     <div th:text="${#temporals.format(question.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!-- #temporals.format(날짜객체, 날짜포맷) : 날짜객체를 날짜포맷에 맞게 변환 -->
                 </div>
                 <div class="badge bg-light text-dark p-2 text-start">
                     <div class="mb-2">
                         <span th:if="${question.author != null}" th:text="${question.author.username}"></span>
+                        <!-- th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함 -->
                     </div>
                     <div th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!-- #temporals.format(날짜객체, 날짜포맷) : 날짜객체를 날짜포맷에 맞게 변환 -->
                 </div>
             </div>
+
             <div class="my-3">
+            <!-- 질문에 대한 추천, 수정, 삭제 버튼을 출력 -->
                 <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
                    th:data-uri="@{|/question/vote/${question.id}|}">
                     추천
+                <!-- href를 사용하지 않는 이유는 추천 버튼을 클릭했을 때, 확인 문구를 띄우기 위해
+                th:href는 동적 링크의 대상 URL을 생성할 수 있고, a태그의 href는 정적인 URL을 사용할 때 사용
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용
+                th:data-uri : 버튼이 호출할 URL을 지정 -> 여기서는 추천을 실행할 URL을 얻기 위해
+                              data-uri 속성은 자바스크립트에서 클릭 이벤트 발생 시 this.dataset.uri와 같이 사용하여 그 값을 얻을 수 있음 -->
                     <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span>
+                    <!-- #lists.size : 이터러블 객체(배열을 일반화한 객체)의 길이(사이즈)를 반환 -->
                 </a>
+
                 <a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary"
                    sec:authorize="isAuthenticated()"
                    th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
                    th:text="수정"></a>
+                   <!-- th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함
+                   #authentication.getPrincipal() : Principal 객체를 return하는 타임리프의 유틸리티, 사용자가 로그인하면 Security는 Authentication 객체를 생성하고 해당 객체에 사용자 이름, 비밀번호, 권한 등과 같은 정보 저장
+                   => 만약 question의 author가 null이 아니고, 사용자의 이름과 question의 author의 username과 같다면 수정 버튼 보이게 설정 -->
+
                 <a href="javascript:void(0);" th:data-uri="@{|/question/delete/${question.id}|}"
                    class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
                    th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}"
                    th:text="삭제"></a>
+                <!-- href를 사용하지 않는 이유는 삭제 버튼을 클릭했을 때, 확인 문구를 띄우기 위해
+                th:href는 동적 링크의 대상 URL을 생성할 수 있고, a태그의 href는 정적인 URL을 사용할 때 사용
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용
+                th:data-uri : 버튼이 호출할 URL을 지정 -> 여기서는 삭제를 실행할 URL을 얻기 위해
+                              data-uri 속성은 자바스크립트에서 클릭 이벤트 발생 시 this.dataset.uri와 같이 사용하여 그 값을 얻을 수 있음 -->
             </div>
         </div>
-    </div>
+    </div> <!-- 질문 카드의 끝 -->
+
     <!-- 답변의 갯수 표시 -->
     <h5 class="border-bottom my-3 py-2"
         th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+    <!-- #lists.size : 이터러블 객체(배열을 일반화한 객체)의 길이(사이즈)를 반환
+    || : 자바 객체의 값을 더할 때/문자열을 연결할 때 사용-->
+
     <!-- 답변 반복 시작 -->
     <div class="card my-3" th:each="answer : ${question.answerList}">
         <a th:id="|answer_${answer.id}|"></a>
         <div class="card-body">
+
             <div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
             <div class="card-text" style="white-space: pre-line;" th:text="${answer.content}"></div>
-            <div class="d-flex justify-content-end">
+            <!-- 답변 내용을 마크다운 형식으로 출력하고, 줄바꿈을 적용
+            th:utext : th:text를 사용하면 HTML의 태그들이 이스케이프(escape) 처리 되어 태그들이 그대로 화면에 보임
+                       변수에서 받은 값에 HTML 태그가 있다면 태그 값을 반영해서 표시
+            th:text : 태그 안의 텍스트를 서버에서 전달 받은 값에 따라 표현하고자 할 때 사용 -->
+
+            <div class="d-flex justify-content-end"> <!-- 답변의 수정 날짜와 작성자 정보를 출력합니다. -->
                 <div th:if="${answer.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                <!-- th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함 -->
                     <div class="mb-2">modified at</div>
                     <div th:text="${#temporals.format(answer.modifyDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!-- #temporals.format(날짜객체, 날짜포맷) : 날짜객체를 날짜포맷에 맞게 변환 -->
                 </div>
                 <div class="badge bg-light text-dark p-2 text-start">
                     <div class="mb-2">
                         <span th:if="${answer.author != null}" th:text="${answer.author.username}"></span>
+                        <!-- th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함 -->
                     </div>
                     <div th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    <!-- #temporals.format(날짜객체, 날짜포맷) : 날짜객체를 날짜포맷에 맞게 변환 -->
                 </div>
             </div>
-            <div class="my-3">
+
+            <div class="my-3"> <!-- 답변에 대한 추천, 수정, 삭제 버튼을 출력합니다. -->
+
                 <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
                    th:data-uri="@{|/answer/vote/${answer.id}|}">
                     추천
+                <!-- href를 사용하지 않는 이유는 추천 버튼을 클릭했을 때, 확인 문구를 띄우기 위해
+                th:href는 동적 링크의 대상 URL을 생성할 수 있고, a태그의 href는 정적인 URL을 사용할 때 사용
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용
+                th:data-uri : 버튼이 호출할 URL을 지정 -> 여기서는 추천을 실행할 URL을 얻기 위해
+                              data-uri 속성은 자바스크립트에서 클릭 이벤트 발생 시 this.dataset.uri와 같이 사용하여 그 값을 얻을 수 있음 -->
                     <span class="badge rounded-pill bg-success" th:text="${#lists.size(answer.voter)}"></span>
+                    <!-- #lists.size : 이터러블 객체(배열을 일반화한 객체)의 길이(사이즈)를 반환 -->
                 </a>
+
                 <a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary"
                    sec:authorize="isAuthenticated()"
                    th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
                    th:text="수정"></a>
+                <!-- th:if : 해당 HTML 엘리먼트가 출력되는 조건을 설정하는 속성으로 해당 속성이 사용될 수 있는 엘리먼트 내부에서 사용해야 함
+                #authentication.getPrincipal() : Principal 객체를 return하는 타임리프의 유틸리티, 사용자가 로그인하면 Security는 Authentication 객체를 생성하고 해당 객체에 사용자 이름, 비밀번호, 권한 등과 같은 정보 저장
+                => 만약 answer author가 null이 아니고, 사용자의 이름과 answer의 author의 username과 같다면 수정 버튼 보이게 설정 -->
+
                 <a href="javascript:void(0);" th:data-uri="@{|/answer/delete/${answer.id}|}"
                    class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
                    th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
                    th:text="삭제"></a>
+                <!-- href를 사용하지 않는 이유는 삭제 버튼을 클릭했을 때, 확인 문구를 띄우기 위해
+                th:href는 동적 링크의 대상 URL을 생성할 수 있고, a태그의 href는 정적인 URL을 사용할 때 사용
+                href="javascript:void(0);" : href 속성이 javascript:void(0)으로 설정되어 있으므로 클릭 이벤트가 발생하면 실제로는 어떤 URL로 이동하지 않음
+	                                         javascript:void(0)는 기본적으로 빈 페이지를 띄우는 것을 의미하나 대개 클릭 이벤트 실행 시, JavaScript 코드를 실행하기 위한 용도로 사용
+                th:data-uri : 버튼이 호출할 URL을 지정 -> 여기서는 삭제를 실행할 URL을 얻기 위해
+                              data-uri 속성은 자바스크립트에서 클릭 이벤트 발생 시 this.dataset.uri와 같이 사용하여 그 값을 얻을 수 있음 -->
             </div>
         </div>
     </div>
     <!-- 답변 반복 끝  -->
+
     <!-- 답변 작성 -->
     <form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
         <div th:replace="~{form_errors :: formErrorsFragment}"></div>
+        <!-- 오류 메시지를 출력하는 데 사용되는 코드 조각을 포함
+        th:replace : 공통 템플릿(공통 템플릿을 템플릿 내에 삽입할 수 있음 == 다른 템플릿 또는 코드 조각(fragment)을 현재 위치에 대체하여 삽입할 수 있음)
+        <div th:replace="~{form_errors :: formErrorsFragment}"></div> : div 엘리먼트를 form_errors.html 파일의 th:fragment 속성명이 formErrorsFragment인 엘리먼트로 교체하라는 의미 -->
         <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control" rows="10"></textarea>
+        <!-- sec:authorize="isAnonymous()" : 로그인 되지 않은 경우에만 해당 엘리먼트가 표시 -> 답변 작성 field 비활성화(disabled) -->
         <textarea sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control" rows="10"></textarea>
+        <!-- sec:authorize="isAuthenticated()" : 로그인 된 경우에만 해당 엘리먼트가 표시 -> 답변 작성 field 활성화 -->
         <input type="submit" value="답변등록" class="btn btn-primary my-2">
     </form>
-</div>
+</div> <!-- "content" 레이아웃 조각의 끝 -->
+
 <script layout:fragment="script" type='text/javascript'>
+/* <script> : JavaScript 코드를 포함하는 태그
+layout:fragment="script" : Thymeleaf 레이아웃 다이얼렉트(dialect)를 사용하여, 이 <script> 태그를 "script"라는 이름의 레이아웃 조각(fragment)으로 정의
+                           이렇게 정의된 레이아웃 조각은 다른 Thymeleaf 템플릿에서 재사용할 수 있음
+                           다른 템플릿에서 이 레이아웃 조각을 가져와 삽입하려면, layout:fragment 속성을 사용하는 방법이 있음 */
     const delete_elements = document.getElementsByClassName("delete");
+    // "delete" 클래스를 가진 요소들을 선택
     Array.from(delete_elements).forEach(function(element) {
+    // 선택된 요소들을 배열로 변환한 후 각 요소에 대해 반복
         element.addEventListener('click', function() {
+        // 현재 요소에 클릭 이벤트 리스너를 추가
             if(confirm("정말로 삭제하시겠습니까?")) {
+            // 사용자에게 삭제 여부를 확인하는 대화상자를 표시하고, 확인 버튼을 누르면 true를 반환
                 location.href = this.dataset.uri;
+                // 사용자가 확인 버튼을 눌렀을 때 요소의 data-uri 속성 값으로 페이지를 리디렉션
             };
         });
     });
     const recommend_elements = document.getElementsByClassName("recommend");
+    // "recommend" 클래스를 가진 요소들을 선택
     Array.from(recommend_elements).forEach(function(element) {
+    // 선택된 요소들을 배열로 변환한 후 각 요소에 대해 반복
         element.addEventListener('click', function() {
+        // 현재 요소에 클릭 이벤트 리스너를 추가
             if(confirm("정말로 추천하시겠습니까?")) {
+            // 사용자에게 추천 여부를 확인하는 대화상자를 표시하고, 확인 버튼을 누르면 true를 반환
                 location.href = this.dataset.uri;
+                // 사용자가 확인 버튼을 눌렀을 때 요소의 data-uri 속성 값으로 페이지를 리디렉션
             };
         });
     });

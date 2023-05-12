@@ -1,22 +1,29 @@
 <!doctype html>
+<!-- HTML5 문서 유형을 선언 -->
 <html lang="ko">
+<!-- 언어를 한국어로 설정하고, html 태그를 시작 -->
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
+    <!-- 문자 인코딩을 UTF-8로 설정 -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Bootstrap CSS -->
+    <!-- 뷰포트 설정을 통해 반응형 웹 페이지를 지원 -->
+    <!-- Bootstrap CSS를 불러옴-->
     <link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">
-    <!-- sbb CSS -->
+    <!-- sbb CSS를 불러옴 -->
     <link rel="stylesheet" type="text/css" th:href="@{/style.css}">
     <title>Hello, sbb!</title>
 </head>
 <body>
 <!-- 네비게이션바 -->
 <nav th:replace="~{navbar :: navbarFragment}"></nav>
+<!-- 네비게이션바를 추가하고, navbarFragment를 참조하여 코드 조각을 삽입 -->
+
 <!-- 기본 템플릿 안에 삽입될 내용 Start -->
 <th:block layout:fragment="content"></th:block>
 <!-- 기본 템플릿 안에 삽입될 내용 End -->
-<!-- Bootstrap JS -->
+
+<!-- Bootstrap JS (부트스트랩 자바스크립트 파일을 불러옴) -->
 <script th:src="@{/bootstrap.min.js}"></script>
 <!-- 자바스크립트 Start -->
 <th:block layout:fragment="script"></th:block>
