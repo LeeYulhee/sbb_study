@@ -48,6 +48,11 @@ public class AnswerController {
                    따로 객체를 생성할 필요 없이 컨트롤러 메서드의 매개변수로 지정하면 스프링부트가 자동으로 객체 생성 */
         /* @Valid : 매개변수 앞에 @Valid 애너테애션을 적용해야 Form 클래스에 애너테이션으로 설정한 검증 기능이 작동(바인딩)
            @PathVariable : 변하는 값을 얻을 때 사용하는데, 매개변수와 Mapping URL 쪽에서 사용한 이름이 동일해야 함. URL 경로에서 값을 추출하여 메서드의 인자로 전달할 때 사용
+                           @PathVariable은 URI의 일부를 컨트롤러 메서드의 매개변수에 바인딩하는데 사용
+                           주로 RESTful 웹 서비스에서 사용되며, URI 경로에서 리소스를 식별하는데 필요한 값을 추출할 때 사용
+                           @PathVariable은 URI 경로 자체를 사용하여 데이터를 받음
+                           예시 : http://localhost:8080/example/123 요청이 들어오면, id 경로 변수(123)가 메서드 매개변수에 바인딩
+                           (@RequestParam은 http://localhost:8080/example?name=test 요청이 들어오면, name 파라미터(test)가 메서드 매개변수에 바인딩)
            BindingResult : 항상 @Valid 뒤에 위치해야 하며, 애너테이션으로 인해 검증이 수행된 결과를 의미하는 객체
            Principal : SpringSecurity가 제공하는 Principal 객체를 사용해 로그인한 사용자에 대한 정보를 알 수 있음 */
         Question question = this.questionService.getQuestion(id);

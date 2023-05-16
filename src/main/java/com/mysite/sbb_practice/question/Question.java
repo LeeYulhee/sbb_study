@@ -36,7 +36,7 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE)
     /* 관계 설정 : Question 하나에 여러 개의 답변이 달릴 수 있기 때문에(1:N 구조) OneToMany로 정의
        mappedBy : 참조 엔티티의 속성명 -> Answer에서 Question이라고 선언했으니 question이라고 매핑
-       cascade : OneToMany, ManyToOne 일 때(parent-child 관계), 엔티티의 상태가 변화하면 관계가 있는 엔티티에도 산태 변화를 전파시키는 옵션
+       cascade : OneToMany, ManyToOne 일 때(parent-child 관계), 엔티티의 상태가 변화하면 관계가 있는 엔티티에도 상태 변화를 전파시키는 옵션
        CascadeType.REMOVE : 질문 하나에 답변이 여러 개일 수 있는데, 질문을 삭제하면 답변들도 전부 삭제될 수 있게 작성한 속성(부모 엔티티가 삭제되면 자식 엔티티도 삭제되는 속성) */
     private List<Answer> answerList;
     // Answer이 여러 개일 수 있기 때문에 List로 받음

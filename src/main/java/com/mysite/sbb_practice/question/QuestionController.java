@@ -36,6 +36,11 @@ public class QuestionController {
                    따로 객체를 생성할 필요 없이 컨트롤러 메서드의 매개변수로 지정하면 스프링부트가 자동으로 객체 생성
            @RequestParam : URL 파라미터로 전달 받은 value를 메서드의 파리마터로 받을 수 있게 해주는 애너테이션
                            HTTP 요청 파라미터를 메서드의 인자로 전달할 때 사용
+                           @RequestParam은 HTTP 요청 파라미터를 컨트롤러 메서드의 매개변수에 바인딩하는데 사용
+                           주로 GET 및 POST 요청에서 쿼리 파라미터나 폼 데이터를 처리할 때 사용
+                           @RequestParam은 요청 파라미터를 사용하여 데이터를 받음
+                           예시 : http://localhost:8080/example?name=test 요청이 들어오면, name 파라미터(test)가 메서드 매개변수에 바인딩
+                           (@PathVariable은 http://localhost:8080/example/123 요청이 들어오면, id 경로 변수(123)가 메서드 매개변수에 바인딩)
            value = "page", defaultValue = "0" : URL에 페이지 파라미터 page가 전달되지 않은 경우 디폴트 값이 0으로 설정
            value = "kw", defaultValue = "" : URL 페이지에 파라미터 kw가 전될되지 않은 경우 디폴트 값이 ""로 설정 -> 모든 값을 검색한다는 뜻 == 모든 목록 출력 */
         /* 실행 흐름 : Controller에 매핑된 URL로 요청이 들어오면, questionService의 getList 메서드 실행 -> questionService의 getList는 int page를 받아 PageRequest.of(page, 개수)를 Pageable 객체에 넣음
@@ -52,7 +57,8 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/detail/{id}")
-    // "question/detail/(question.id)"와 URL 연결
+    /* "question/detail/(question.id)"와 URL 연결
+       value = "" 부분은 사실 상 차이가 없다고 봐도 됨 */
     public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm) {
         /* 질문의 상세 페이지를 보여주는 메서드로 Model, 질문의 id(URL에서 얻은 값), AnswerForm을 매개변수로 받음
            @PathVariable : 변하는 값을 얻을 때 사용하는데, 매개변수와 Mapping URL 쪽에서 사용한 이름이 동일해야 함. URL 경로에서 값을 추출하여 메서드의 인자로 전달할 때 사용 */
