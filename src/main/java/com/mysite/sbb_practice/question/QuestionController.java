@@ -79,7 +79,8 @@ public class QuestionController {
     // "question/create"와 URL 연결
     public String questionCreate(QuestionForm questionForm) {
         /* 질문 작성하는 페이지를 보여주는 메서드로 QuestionForm을 매개변수로 받음(다만 작성된 내용이 없으므로 Null 상태일 것)
-           QuestionForm을 받는 이유는 question_form.html 템플릿은 "질문 등록하기" 버튼을 통해 GET 방식으로 요청되더라도 th:object에 의해 QuestionForm 객체가 필요하기 때문 */
+           QuestionForm을 받는 이유는 question_form.html 템플릿은 "질문 등록하기" 버튼을 통해 GET 방식으로 요청되더라도 th:object에 의해 QuestionForm 객체가 필요하기 때문
+           QuestionForm과 같이 매개변수로 바인딩한 객체는 Model 객체로 전달하지 않아도 템플릿에서 사용이 가능 */
         return "question_form";
         // 질문을 작성하는 question_form.html(View)을 return
     }
